@@ -1,4 +1,5 @@
 // aqui vamos a hacer algo muy basico con axum, crear un servidor web
+mod models;
 mod handlers;
 mod routes;
 use serde::{Deserialize, Serialize};

@@ -1,23 +1,18 @@
+use crate::models::user::{CreateUser, User};
 use axum::Json;
-use serde::Serialize;
+use chrono::Utc;
 
-#[derive(Serialize)]
-pub struct User {
-    name: String,
-    age: u8,
-}
-
-pub async fn list_users() -> Json<Vec<User>> {
-    let users = vec![
-        User {
-            name: String::from("Orlando"),
-            age: 20,
-        },
-        User {
-            name: String::from("David"),
-            age: 21,
-        },
-    ];
+pub async fn get_users() -> Json<Vec<User>> {
+    let users = vec![User {
+        id: 1,
+        name: String::from("Orlando"),
+        username: String::from("orlandotellez12"),
+        password: String::from("123456"),
+        age: 20,
+        created_at: Utc::now().naive_utc(),
+    }];
 
     Json(users)
 }
+
+//pub async fn create_user(Json(payload): Json<CreateUser>) -> Json<User> {}
