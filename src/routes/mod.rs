@@ -2,8 +2,10 @@
 // en esta carpeta routes se registran todas las rutas que tiene el servidor
 pub mod index;
 pub mod users;
+use crate::states::app_state::AppState;
+
 use axum::Router;
 
-pub fn create_routes() -> Router {
+pub fn create_routes() -> Router<AppState> {
     Router::new().merge(index::routes()).merge(users::routes())
 }
