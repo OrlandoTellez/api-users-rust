@@ -58,7 +58,6 @@ impl IntoResponse for AppError {
                 )
             }
         };
-
         (status, Json(message_error)).into_response()
     }
 }
