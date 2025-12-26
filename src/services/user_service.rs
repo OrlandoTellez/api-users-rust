@@ -1,3 +1,4 @@
+use bcrypt::{DEFAULT_COST, hash};
 use chrono::Utc;
 use validator::Validate;
 
@@ -25,12 +26,14 @@ impl UserService {
             .lock()
             .map_err(|_| AppError::InternalServerError("Internal server error".to_string()))?;
 
+        let hashed_password = hash(payload.password, DEFAULT_COST).unwrap();
+
         let new_user: User = User {
             id: users.len() as u32 + 1,
             name: payload.name,
             username: payload.username,
             age: payload.age,
-            password: payload.password, // aun hay que hashear la contraseña y no devolverla xd
+            password: hashed_password,
             gender: payload.gender,
             created_at: Utc::now().naive_utc(),
         };
