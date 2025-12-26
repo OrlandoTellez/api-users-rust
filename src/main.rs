@@ -1,4 +1,5 @@
 // aqui vamos a hacer algo muy basico con axum, crear un servidor web
+mod config;
 mod handlers;
 mod helpers;
 mod models;
@@ -7,6 +8,7 @@ mod services;
 mod states;
 
 use crate::{models::user::User, states::app_state::AppState};
+use dotenvy::dotenv;
 use std::sync::{Arc, Mutex};
 use tokio::net::TcpListener;
 
@@ -14,6 +16,8 @@ const PORT: &str = "3000";
 
 #[tokio::main]
 async fn main() {
+    dotenv().ok();
+
     let state: AppState = Arc::new(Mutex::new(Vec::<User>::new()));
 
     let app = routes::create_routes().with_state(state);
