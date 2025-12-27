@@ -1,6 +1,6 @@
 use bcrypt::{DEFAULT_COST, hash};
 use chrono::Utc;
-use validator::Validate;
+use validator::{Validate, ValidationError, ValidationErrors};
 
 use crate::{
     helpers::errors::AppError,
@@ -26,7 +26,18 @@ impl UserService {
             .lock()
             .map_err(|_| AppError::InternalServerError("Internal server error".to_string()))?;
 
-        let hashed_password = hash(payload.password, DEFAULT_COST).unwrap();
+        let hashed_password: String = hash(payload.password, DEFAULT_COST).unwrap();
+
+        if users.iter().any(|u| u.username == payload.username) {
+            let mut errors = ValidationErrors::new();
+            let mut error = ValidationError::new("unique");
+
+            error.message = Some("El usuario ya existe".into());
+
+            errors.add("username", error);
+
+            return Err(AppError::ValidationError(errors));
+        }
 
         let new_user: User = User {
             id: users.len() as u32 + 1,
