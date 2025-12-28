@@ -4,7 +4,7 @@ use validator::{Validate, ValidationError, ValidationErrors};
 
 use crate::{
     helpers::errors::AppError,
-    models::user::{CreateUser, User},
+    models::user::{CreateUser, UpdateUser, User},
     states::app_state::AppState,
 };
 
@@ -52,5 +52,44 @@ impl UserService {
         users.push(new_user.clone());
 
         Ok(new_user)
+    }
+
+    pub async fn update_user(
+        state: &AppState,
+        id: u32,
+        payload: UpdateUser,
+    ) -> Result<User, AppError> {
+        payload.validate().map_err(AppError::ValidationError)?;
+
+        let mut users = state
+            .lock()
+            .map_err(|_| AppError::InternalServerError("Internal server error".to_string()))?;
+
+        let user = users
+            .iter_mut()
+            .find(|u| u.id == id)
+            .ok_or_else(|| AppError::NotFound("User not found".to_string()))?;
+
+        if let Some(name) = payload.name {
+            user.name = name;
+        }
+
+        if let Some(username) = payload.username {
+            user.username = username;
+        }
+
+        if let Some(age) = payload.age {
+            user.age = age;
+        }
+
+        if let Some(gender) = payload.gender {
+            user.gender = gender;
+        }
+
+        if let Some(password) = payload.password {
+            user.password = hash(password, DEFAULT_COST).unwrap();
+        }
+
+        Ok(user.clone())
     }
 }

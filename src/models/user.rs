@@ -21,6 +21,8 @@ pub struct CreateUser {
 
     #[validate(length(min = 1, max = 30, message = "Only 1 and 30 characters are allowed."))]
     pub username: String,
+
+    #[validate(length(min = 6, message = "The password must be at least 6 characters long."))]
     pub password: String,
 
     #[validate(range(min = 1, max = 100, message = "very high age"))]
@@ -28,4 +30,22 @@ pub struct CreateUser {
 
     #[validate(custom(function = "validate_gender"))]
     pub gender: String,
+}
+
+#[derive(Deserialize, Validate)]
+pub struct UpdateUser {
+    #[validate(length(min = 1, max = 30, message = "Only 1 and 30 characters are allowed."))]
+    pub name: Option<String>,
+
+    #[validate(length(min = 1, max = 30, message = "Only 1 and 30 characters are allowed."))]
+    pub username: Option<String>,
+
+    #[validate(length(min = 6, message = "The password must be at least 6 characters long."))]
+    pub password: Option<String>,
+
+    #[validate(range(min = 1, max = 100, message = "very high age"))]
+    pub age: Option<u8>,
+
+    #[validate(custom(function = "validate_gender"))]
+    pub gender: Option<String>,
 }
