@@ -6,11 +6,15 @@ pub mod users;
 
 use crate::states::app_state::AppState;
 
+use crate::openapi::ApiDoc;
 use axum::Router;
+use utoipa::OpenApi;
+use utoipa_swagger_ui::SwaggerUi;
 
 pub fn create_routes() -> Router<AppState> {
     Router::new()
         .merge(index::routes())
         .merge(users::routes())
         .merge(auth::routes())
+        .merge(SwaggerUi::new("/docs").url("/api-docs/openapi.json", ApiDoc::openapi()))
 }

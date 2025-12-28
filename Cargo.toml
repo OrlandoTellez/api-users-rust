@@ -15,3 +15,5 @@ bcrypt = "0.15"
 once_cell = "1.19" # Para gestionar la SECRET_KEY globalmente
 dotenv = "0.15"    # Para leer variables de entorno
 dotenvy = "0.15.7"
+utoipa = { version = "5.4.0", features = ["axum_extras"] }
+utoipa-swagger-ui = { version = "9", features = ["axum"] }

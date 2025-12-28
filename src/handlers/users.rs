@@ -8,6 +8,14 @@ use crate::states::app_state::AppState;
 use axum::extract::Path;
 use axum::{Json, extract::State};
 
+#[utoipa::path(
+    get,
+    path = "/users",
+    tag = "Users",
+    responses(
+        (status = 200, description = "Lista de usuarios", body = ApiResponse<Vec<User>>)
+    )
+)]
 pub async fn get_users(
     State(state): State<AppState>,
 ) -> Result<Json<ApiResponse<Vec<User>>>, AppError> {
@@ -18,6 +26,15 @@ pub async fn get_users(
     Ok(Json(response))
 }
 
+#[utoipa::path(
+    post,
+    path = "/users",
+    tag = "Users",
+    request_body = CreateUser,
+    responses(
+        (status = 200, description = "Usuario creado", body = ApiResponse<User>)
+    )
+)]
 pub async fn create_user(
     State(state): State<AppState>,
     Json(payload): Json<CreateUser>,
@@ -29,6 +46,19 @@ pub async fn create_user(
     Ok(Json(response))
 }
 
+#[utoipa::path(
+    put,
+    path = "/users/{id}",
+    tag = "Users",
+    params(
+        ("id" = u32, Path, description = "ID del usuario")
+    ),
+    request_body = UpdateUser,
+    responses(
+        (status = 200, description = "Usuario actualizado", body = ApiResponse<User>),
+        (status = 404, description = "Usuario no encontrado")
+    )
+)]
 pub async fn update_user(
     State(state): State<AppState>,
     Path(id): Path<u32>,
@@ -41,6 +71,18 @@ pub async fn update_user(
     Ok(Json(response))
 }
 
+#[utoipa::path(
+    delete,
+    path = "/users/{id}",
+    tag = "Users",
+    params(
+        ("id" = u32, Path, description = "ID del usuario")
+    ),
+    responses(
+        (status = 200, description = "Usuario eliminado"),
+        (status = 404, description = "Usuario no encontrado")
+    )
+)]
 pub async fn delete_user(
     State(state): State<AppState>,
     Path(id): Path<u32>,

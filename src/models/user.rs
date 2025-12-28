@@ -1,9 +1,10 @@
 use crate::helpers::validate_gender::validate_gender;
 use chrono::NaiveDateTime;
 use serde::{Deserialize, Serialize};
+use utoipa::ToSchema;
 use validator::Validate;
 
-#[derive(Clone, Serialize)]
+#[derive(Clone, Serialize, ToSchema)]
 pub struct User {
     pub id: u32,
     pub name: String,
@@ -11,10 +12,11 @@ pub struct User {
     pub password: String,
     pub age: u8,
     pub gender: String,
+    #[schema(value_type = String, format = DateTime)]
     pub created_at: NaiveDateTime,
 }
 
-#[derive(Deserialize, Serialize, Validate)]
+#[derive(Deserialize, Serialize, Validate, ToSchema)]
 pub struct CreateUser {
     #[validate(length(min = 1, max = 30, message = "Only 1 and 30 characters are allowed."))]
     pub name: String,
@@ -32,7 +34,7 @@ pub struct CreateUser {
     pub gender: String,
 }
 
-#[derive(Deserialize, Validate)]
+#[derive(Deserialize, Validate, ToSchema)]
 pub struct UpdateUser {
     #[validate(length(min = 1, max = 30, message = "Only 1 and 30 characters are allowed."))]
     pub name: Option<String>,

@@ -3,6 +3,7 @@ mod config;
 mod handlers;
 mod helpers;
 mod models;
+mod openapi;
 mod routes;
 mod services;
 mod states;

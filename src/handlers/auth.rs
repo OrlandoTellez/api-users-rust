@@ -10,6 +10,15 @@ use crate::{
     states::app_state::AppState,
 };
 
+#[utoipa::path(
+    post,
+    path = "/auth/login",
+    tag = "auth",
+    request_body = LoginPayload,
+    responses(
+        (status = 200, description = "Inicio de sesión", body = ApiResponse<AuthResponse>)
+    )
+)]
 pub async fn login_user(
     State(state): State<AppState>,
     Json(payload): Json<LoginPayload>,
