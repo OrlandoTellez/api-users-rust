@@ -40,3 +40,14 @@ pub async fn update_user(
 
     Ok(Json(response))
 }
+
+pub async fn delete_user(
+    State(state): State<AppState>,
+    Path(id): Path<u32>,
+) -> Result<Json<ApiResponse<()>>, AppError> {
+    UserService::delete_user(&state, id).await?;
+
+    let response: ApiResponse<()> = success_response((), "user deleted successfully");
+
+    Ok(Json(response))
+}

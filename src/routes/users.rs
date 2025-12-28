@@ -7,5 +7,8 @@ use axum::{
 pub fn routes() -> Router<AppState> {
     Router::new()
         .route("/users", get(users::get_users).post(users::create_user))
-        .route("/user/{id}", put(users::update_user))
+        .route(
+            "/user/{id}",
+            put(users::update_user).delete(users::delete_user),
+        )
 }

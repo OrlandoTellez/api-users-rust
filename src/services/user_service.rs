@@ -92,4 +92,19 @@ impl UserService {
 
         Ok(user.clone())
     }
+
+    pub async fn delete_user(state: &AppState, id: u32) -> Result<(), AppError> {
+        let mut users = state
+            .lock()
+            .map_err(|_| AppError::InternalServerError("Internal server error".to_string()))?;
+
+        let user = users
+            .iter()
+            .position(|u| u.id == id)
+            .ok_or_else(|| AppError::NotFound("User not found".to_string()))?;
+
+        users.remove(user);
+
+        Ok(())
+    }
 }
