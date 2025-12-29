@@ -13,8 +13,6 @@ use dotenvy::dotenv;
 use std::sync::{Arc, Mutex};
 use tokio::net::TcpListener;
 
-const PORT: &str = "3000";
-
 #[tokio::main]
 async fn main() {
     dotenv().ok();
@@ -23,7 +21,9 @@ async fn main() {
 
     let app = routes::create_routes().with_state(state);
 
-    let url = format!("0.0.0.0:{}", PORT);
+    let port = std::env::var("PORT").unwrap_or_else(|_| "3000".to_string());
+
+    let url = format!("0.0.0.0:{}", port);
 
     // ojo qui es importante saber el concepto de pasar propiedad, por eso el & es importante, porque no pasamos la propiedad, sino solo prestamos el valor.
     let listener = TcpListener::bind(&url).await.unwrap();
