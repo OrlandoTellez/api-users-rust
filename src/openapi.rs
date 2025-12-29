@@ -11,6 +11,7 @@ use crate::models::user::{CreateUser, UpdateUser, User};
     paths(
         index::hello_world,
         users::get_users,
+        users::get_user_by_id,
         users::create_user,
         users::update_user,
         users::delete_user,

@@ -19,6 +19,19 @@ impl UserService {
         Ok(users.clone())
     }
 
+    pub async fn get_user_by_id(state: &AppState, id: u32) -> Result<User, AppError> {
+        let users = state
+            .lock()
+            .map_err(|_| AppError::InternalServerError("Internal server error".to_string()))?;
+
+        let user_by_id = users
+            .iter()
+            .find(|u| u.id == id)
+            .ok_or_else(|| AppError::NotFound("User not found".to_string()))?;
+
+        Ok(user_by_id.clone())
+    }
+
     pub async fn create_user(state: &AppState, payload: CreateUser) -> Result<User, AppError> {
         payload.validate().map_err(AppError::ValidationError)?;
 

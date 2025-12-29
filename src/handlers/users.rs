@@ -27,6 +27,30 @@ pub async fn get_users(
 }
 
 #[utoipa::path(
+    get,
+    path = "/users/{id}",
+    tag = "Users",
+    params(
+        ("id" = u32, Path, description = "ID del usuario")
+    ),
+    request_body = User,
+    responses(
+        (status = 200, description = "Usuario encontrado", body = ApiResponse<User>),
+        (status = 404, description = "Usuario no encontrado")
+    )
+)]
+pub async fn get_user_by_id(
+    State(state): State<AppState>,
+    Path(id): Path<u32>,
+) -> Result<Json<ApiResponse<User>>, AppError> {
+    let user_by_id = UserService::get_user_by_id(&state, id).await?;
+
+    let response: ApiResponse<User> = success_response(user_by_id, "User received");
+
+    Ok(Json(response))
+}
+
+#[utoipa::path(
     post,
     path = "/users",
     tag = "Users",
