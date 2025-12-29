@@ -10,6 +10,7 @@ mod states;
 
 use crate::{models::user::User, states::app_state::AppState};
 use dotenvy::dotenv;
+use std::net::SocketAddr;
 use std::sync::{Arc, Mutex};
 use tokio::net::TcpListener;
 
@@ -21,14 +22,16 @@ async fn main() {
 
     let app = routes::create_routes().with_state(state);
 
-    let port = std::env::var("PORT").unwrap_or_else(|_| "3000".to_string());
+    let port: u16 = std::env::var("PORT")
+        .unwrap_or_else(|_| "3000".to_string())
+        .parse()
+        .unwrap_or(3000);
 
-    let url = format!("0.0.0.0:{}", port);
+    let addr = SocketAddr::from(([0, 0, 0, 0], port));
 
-    // ojo qui es importante saber el concepto de pasar propiedad, por eso el & es importante, porque no pasamos la propiedad, sino solo prestamos el valor.
-    let listener = TcpListener::bind(&url).await.unwrap();
+    let listener = TcpListener::bind(addr).await.unwrap();
 
-    println!("Server listener in http://{}", &url);
+    println!("Server listener on http://{}", addr);
 
     axum::serve(listener, app).await.unwrap();
 }
