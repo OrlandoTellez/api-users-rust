@@ -3,7 +3,7 @@ use crate::helpers::success_response::success_response;
 use crate::models::response::ApiResponse;
 use crate::models::user::{CreateUser, UpdateUser, User};
 use crate::services::user_service::UserService;
-use crate::states::app_state::AppState;
+use crate::states::db::Db;
 
 use axum::extract::Path;
 use axum::{Json, extract::State};
@@ -16,10 +16,8 @@ use axum::{Json, extract::State};
         (status = 200, description = "Lista de usuarios", body = ApiResponse<Vec<User>>)
     )
 )]
-pub async fn get_users(
-    State(state): State<AppState>,
-) -> Result<Json<ApiResponse<Vec<User>>>, AppError> {
-    let users: Vec<User> = UserService::get_users(&state).await?;
+pub async fn get_users(State(db): State<Db>) -> Result<Json<ApiResponse<Vec<User>>>, AppError> {
+    let users: Vec<User> = UserService::get_users(&db).await.unwrap();
 
     let response: ApiResponse<Vec<User>> = success_response(users, "User list received");
 
@@ -40,10 +38,10 @@ pub async fn get_users(
     )
 )]
 pub async fn get_user_by_id(
-    State(state): State<AppState>,
-    Path(id): Path<u32>,
+    State(bd): State<Db>,
+    Path(id): Path<i32>,
 ) -> Result<Json<ApiResponse<User>>, AppError> {
-    let user_by_id = UserService::get_user_by_id(&state, id).await?;
+    let user_by_id: User = UserService::get_user_by_id(&bd, id).await.unwrap();
 
     let response: ApiResponse<User> = success_response(user_by_id, "User received");
 
@@ -60,10 +58,10 @@ pub async fn get_user_by_id(
     )
 )]
 pub async fn create_user(
-    State(state): State<AppState>,
+    State(bd): State<Db>,
     Json(payload): Json<CreateUser>,
 ) -> Result<Json<ApiResponse<User>>, AppError> {
-    let user: User = UserService::create_user(&state, payload).await?;
+    let user: User = UserService::create_user(&bd, payload).await?;
 
     let response: ApiResponse<User> = success_response(user, "Usuario creado exitosamente");
 
@@ -84,15 +82,19 @@ pub async fn create_user(
     )
 )]
 pub async fn update_user(
-    State(state): State<AppState>,
-    Path(id): Path<u32>,
+    State(bd): State<Db>,
+    Path(id): Path<i32>,
     Json(payload): Json<UpdateUser>,
 ) -> Result<Json<ApiResponse<User>>, AppError> {
-    let user: User = UserService::update_user(&state, id, payload).await?;
+    let user_option = UserService::update_user(&bd, id, payload).await?;
 
-    let response: ApiResponse<User> = success_response(user, "user updated successfully");
-
-    Ok(Json(response))
+    match user_option {
+        Some(user) => {
+            let response: ApiResponse<User> = success_response(user, "user updated successfully");
+            Ok(Json(response))
+        }
+        None => Err(AppError::NotFound("User not found".into())),
+    }
 }
 
 #[utoipa::path(
@@ -108,10 +110,10 @@ pub async fn update_user(
     )
 )]
 pub async fn delete_user(
-    State(state): State<AppState>,
-    Path(id): Path<u32>,
+    State(bd): State<Db>,
+    Path(id): Path<i32>,
 ) -> Result<Json<ApiResponse<()>>, AppError> {
-    UserService::delete_user(&state, id).await?;
+    UserService::delete_user(&bd, id).await?;
 
     let response: ApiResponse<()> = success_response((), "user deleted successfully");
 

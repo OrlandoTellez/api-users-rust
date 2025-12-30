@@ -61,3 +61,9 @@ impl IntoResponse for AppError {
         (status, Json(message_error)).into_response()
     }
 }
+
+impl From<sqlx::Error> for AppError {
+    fn from(err: sqlx::Error) -> Self {
+        AppError::InternalServerError(err.to_string())
+    }
+}

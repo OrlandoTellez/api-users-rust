@@ -1,122 +1,112 @@
 use bcrypt::{DEFAULT_COST, hash};
-use chrono::Utc;
-use validator::{Validate, ValidationError, ValidationErrors};
+use validator::Validate;
 
 use crate::{
     helpers::errors::AppError,
     models::user::{CreateUser, UpdateUser, User},
-    states::app_state::AppState,
+    states::db::Db,
 };
 
 pub struct UserService;
 
 impl UserService {
-    pub async fn get_users(state: &AppState) -> Result<Vec<User>, AppError> {
-        let users = state
-            .lock()
-            .map_err(|_| AppError::InternalServerError("Internal server error".to_string()))?;
+    pub async fn get_users(db: &Db) -> Result<Vec<User>, AppError> {
+        let users: Vec<User> = sqlx::query_as!(
+            User,
+            r#"
+                SELECT id, name, password, username, age, gender as "gender: _", created_at
+                FROM users
+                ORDER BY id
+            "#
+        )
+        .fetch_all(db)
+        .await?;
 
-        Ok(users.clone())
+        Ok(users)
     }
 
-    pub async fn get_user_by_id(state: &AppState, id: u32) -> Result<User, AppError> {
-        let users = state
-            .lock()
-            .map_err(|_| AppError::InternalServerError("Internal server error".to_string()))?;
+    pub async fn get_user_by_id(bd: &Db, id: i32) -> Result<User, AppError> {
+        let user: User = sqlx::query_as!(
+            User,
+            r#"
+                SELECT id, name, password, username, age, gender as "gender: _", created_at
+                FROM users
+                WHERE id = $1
+            "#,
+            id
+        )
+        .fetch_one(bd)
+        .await?;
 
-        let user_by_id = users
-            .iter()
-            .find(|u| u.id == id)
-            .ok_or_else(|| AppError::NotFound("User not found".to_string()))?;
-
-        Ok(user_by_id.clone())
+        Ok(user)
     }
 
-    pub async fn create_user(state: &AppState, payload: CreateUser) -> Result<User, AppError> {
+    pub async fn create_user(db: &Db, payload: CreateUser) -> Result<User, AppError> {
         payload.validate().map_err(AppError::ValidationError)?;
 
-        let mut users = state
-            .lock()
-            .map_err(|_| AppError::InternalServerError("Internal server error".to_string()))?;
-
         let hashed_password: String = hash(payload.password, DEFAULT_COST).unwrap();
+        let user: User = sqlx::query_as!(
+            User,
+            r#"
+                INSERT INTO users (name, username, password, age, gender)
+                VALUES ($1, $2, $3, $4, $5)
+                RETURNING id, name, username, password, age, gender as "gender: _", created_at
+            "#,
+            payload.name,
+            payload.username,
+            hashed_password,
+            payload.age,
+            payload.gender as _
+        )
+        .fetch_one(db)
+        .await?;
 
-        if users.iter().any(|u| u.username == payload.username) {
-            let mut errors = ValidationErrors::new();
-            let mut error = ValidationError::new("unique");
-
-            error.message = Some("El usuario ya existe".into());
-
-            errors.add("username", error);
-
-            return Err(AppError::ValidationError(errors));
-        }
-
-        let new_user: User = User {
-            id: users.len() as u32 + 1,
-            name: payload.name,
-            username: payload.username,
-            age: payload.age,
-            password: hashed_password,
-            gender: payload.gender,
-            created_at: Utc::now().naive_utc(),
-        };
-
-        users.push(new_user.clone());
-
-        Ok(new_user)
+        Ok(user)
     }
 
     pub async fn update_user(
-        state: &AppState,
-        id: u32,
+        db: &Db,
+        id: i32,
         payload: UpdateUser,
-    ) -> Result<User, AppError> {
-        payload.validate().map_err(AppError::ValidationError)?;
+    ) -> Result<Option<User>, AppError> {
+        let user = sqlx::query_as!(
+            User,
+            r#"
+            UPDATE users
+            SET
+                name = COALESCE($1, name),
+                username = COALESCE($2, username),
+                age = COALESCE($3, age),
+                gender = COALESCE($4, gender)
+            WHERE id = $5
+            RETURNING id, name, username, password, age, gender as "gender: _", created_at
+            "#,
+            payload.name,
+            payload.username,
+            payload.age,
+            payload.gender as _,
+            id
+        )
+        .fetch_optional(db)
+        .await?;
 
-        let mut users = state
-            .lock()
-            .map_err(|_| AppError::InternalServerError("Internal server error".to_string()))?;
-
-        let user = users
-            .iter_mut()
-            .find(|u| u.id == id)
-            .ok_or_else(|| AppError::NotFound("User not found".to_string()))?;
-
-        if let Some(name) = payload.name {
-            user.name = name;
-        }
-
-        if let Some(username) = payload.username {
-            user.username = username;
-        }
-
-        if let Some(age) = payload.age {
-            user.age = age;
-        }
-
-        if let Some(gender) = payload.gender {
-            user.gender = gender;
-        }
-
-        if let Some(password) = payload.password {
-            user.password = hash(password, DEFAULT_COST).unwrap();
-        }
-
-        Ok(user.clone())
+        Ok(user)
     }
 
-    pub async fn delete_user(state: &AppState, id: u32) -> Result<(), AppError> {
-        let mut users = state
-            .lock()
-            .map_err(|_| AppError::InternalServerError("Internal server error".to_string()))?;
+    pub async fn delete_user(db: &Db, id: i32) -> Result<(), AppError> {
+        let result = sqlx::query!(
+            r#"
+            DELETE FROM users
+            WHERE id = $1
+            "#,
+            id
+        )
+        .execute(db)
+        .await?;
 
-        let user = users
-            .iter()
-            .position(|u| u.id == id)
-            .ok_or_else(|| AppError::NotFound("User not found".to_string()))?;
-
-        users.remove(user);
+        if result.rows_affected() == 0 {
+            return Err(AppError::NotFound("User not found".into()));
+        }
 
         Ok(())
     }

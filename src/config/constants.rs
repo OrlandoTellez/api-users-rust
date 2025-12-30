@@ -6,3 +6,8 @@ pub static JWT_SECRET: Lazy<String> = Lazy::new(|| {
     env::var("JWT_SECRET")
         .unwrap_or_else(|_| "clave_super_secreta_jaja_usar_la_de_entorno_env".to_string())
 });
+
+pub static DATABASE_URL: Lazy<String> = Lazy::new(|| {
+    env::var("DATABASE_URL")
+        .unwrap_or_else(|_| "postgres://user:password@localhost:5432/api_users".to_string())
+});

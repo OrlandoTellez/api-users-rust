@@ -7,7 +7,7 @@ use crate::{
         response::ApiResponse,
     },
     services::auth_service::AuthService,
-    states::app_state::AppState,
+    states::db::Db,
 };
 
 #[utoipa::path(
@@ -20,7 +20,7 @@ use crate::{
     )
 )]
 pub async fn login_user(
-    State(state): State<AppState>,
+    State(state): State<Db>,
     Json(payload): Json<LoginPayload>,
 ) -> Result<Json<ApiResponse<AuthResponse>>, AppError> {
     let login_user = AuthService::login_user(&state, payload).await?;

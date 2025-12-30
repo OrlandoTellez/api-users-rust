@@ -1,19 +1,29 @@
-use crate::helpers::validate_gender::validate_gender;
+//use crate::helpers::validake_gender::validate_gender;
 use chrono::NaiveDateTime;
 use serde::{Deserialize, Serialize};
+use sqlx::Type;
 use utoipa::ToSchema;
 use validator::Validate;
 
-#[derive(Clone, Serialize, ToSchema)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Type, ToSchema)]
+#[sqlx(type_name = "valid_genders", rename_all = "snake_case")]
+pub enum Gender {
+    Male,
+    Female,
+    Other,
+    PreferNotToSay,
+}
+
+#[derive(Clone, Deserialize, Serialize, ToSchema)]
 pub struct User {
-    pub id: u32,
+    pub id: i32,
     pub name: String,
     pub username: String,
     pub password: String,
-    pub age: u8,
-    pub gender: String,
+    pub age: i32,
+    pub gender: Gender,
     #[schema(value_type = String, format = DateTime)]
-    pub created_at: NaiveDateTime,
+    pub created_at: Option<NaiveDateTime>,
 }
 
 #[derive(Deserialize, Serialize, Validate, ToSchema)]
@@ -28,13 +38,13 @@ pub struct CreateUser {
     pub password: String,
 
     #[validate(range(min = 1, max = 100, message = "very high age"))]
-    pub age: u8,
+    pub age: i32,
 
-    #[validate(custom(function = "validate_gender"))]
-    pub gender: String,
+    //#[validate(custom(function = "validate_gender"))]
+    pub gender: Gender,
 }
 
-#[derive(Deserialize, Validate, ToSchema)]
+#[derive(Debug, Deserialize, Validate, ToSchema)]
 pub struct UpdateUser {
     #[validate(length(min = 1, max = 30, message = "Only 1 and 30 characters are allowed."))]
     pub name: Option<String>,
@@ -46,8 +56,8 @@ pub struct UpdateUser {
     pub password: Option<String>,
 
     #[validate(range(min = 1, max = 100, message = "very high age"))]
-    pub age: Option<u8>,
+    pub age: Option<i32>,
 
-    #[validate(custom(function = "validate_gender"))]
-    pub gender: Option<String>,
+    //#[validate(custom(function = "validate_gender"))]
+    pub gender: Option<Gender>,
 }

@@ -4,14 +4,13 @@ pub mod auth;
 pub mod index;
 pub mod users;
 
-use crate::states::app_state::AppState;
-
 use crate::openapi::ApiDoc;
+use crate::states::db::Db;
 use axum::Router;
 use utoipa::OpenApi;
 use utoipa_swagger_ui::SwaggerUi;
 
-pub fn create_routes() -> Router<AppState> {
+pub fn create_routes() -> Router<Db> {
     Router::new()
         .merge(index::routes())
         .merge(users::routes())

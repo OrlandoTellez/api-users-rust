@@ -8,19 +8,25 @@ mod routes;
 mod services;
 mod states;
 
-use crate::{models::user::User, states::app_state::AppState};
+use crate::config::constants::DATABASE_URL;
 use dotenvy::dotenv;
+use sqlx::postgres::PgPoolOptions;
 use std::net::SocketAddr;
-use std::sync::{Arc, Mutex};
 use tokio::net::TcpListener;
 
 #[tokio::main]
 async fn main() {
     dotenv().ok();
 
-    let state: AppState = Arc::new(Mutex::new(Vec::<User>::new()));
+    let db = PgPoolOptions::new()
+        .max_connections(5)
+        .connect(&DATABASE_URL)
+        .await
+        .expect("Failed to connect to database");
 
-    let app = routes::create_routes().with_state(state);
+    println!("DATABASE_URL = {}", &*DATABASE_URL);
+
+    let app = routes::create_routes().with_state(db);
 
     let port: u16 = std::env::var("PORT")
         .unwrap_or_else(|_| "3000".to_string())

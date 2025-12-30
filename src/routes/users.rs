@@ -1,13 +1,13 @@
-use crate::{handlers::users, states::app_state::AppState};
+use crate::{handlers::users, states::db::Db};
 use axum::{Router, routing::get};
 
-pub fn routes() -> Router<AppState> {
+pub fn routes() -> Router<Db> {
     Router::new()
         .route("/users", get(users::get_users).post(users::create_user))
         .route(
             "/user/{id}",
             get(users::get_user_by_id)
-                .put(users::update_user)
+                .patch(users::update_user)
                 .delete(users::delete_user),
         )
 }
