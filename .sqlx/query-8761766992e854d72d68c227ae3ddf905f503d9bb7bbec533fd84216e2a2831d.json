@@ -1,0 +1,34 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            SELECT id, username, password\n            FROM users\n            WHERE username = $1\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 1,
+        "name": "username",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 2,
+        "name": "password",
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "8761766992e854d72d68c227ae3ddf905f503d9bb7bbec533fd84216e2a2831d"
+}

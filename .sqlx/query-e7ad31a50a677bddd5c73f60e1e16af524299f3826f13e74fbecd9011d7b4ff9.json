@@ -1,0 +1,86 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                INSERT INTO users (name, username, password, age, gender)\n                VALUES ($1, $2, $3, $4, $5)\n                RETURNING id, name, username, password, age, gender as \"gender: _\", created_at\n            ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 1,
+        "name": "name",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 2,
+        "name": "username",
+        "type_info": "Varchar"
+      },
+      {
+        "ordinal": 3,
+        "name": "password",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 4,
+        "name": "age",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 5,
+        "name": "gender: _",
+        "type_info": {
+          "Custom": {
+            "name": "valid_genders",
+            "kind": {
+              "Enum": [
+                "male",
+                "female",
+                "other",
+                "prefer_not_to_say"
+              ]
+            }
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "created_at",
+        "type_info": "Timestamp"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Varchar",
+        "Varchar",
+        "Text",
+        "Int4",
+        {
+          "Custom": {
+            "name": "valid_genders",
+            "kind": {
+              "Enum": [
+                "male",
+                "female",
+                "other",
+                "prefer_not_to_say"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      true
+    ]
+  },
+  "hash": "e7ad31a50a677bddd5c73f60e1e16af524299f3826f13e74fbecd9011d7b4ff9"
+}
