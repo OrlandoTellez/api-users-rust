@@ -24,8 +24,6 @@ async fn main() {
         .await
         .expect("Failed to connect to database");
 
-    println!("DATABASE_URL = {}", &*DATABASE_URL);
-
     let app = routes::create_routes().with_state(db);
 
     let port: u16 = std::env::var("PORT")

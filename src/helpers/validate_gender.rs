@@ -1,5 +1,6 @@
 use validator::ValidationError;
 
+#[allow(dead_code)]
 pub fn validate_gender(gender: &str) -> Result<(), ValidationError> {
     let validated_gender = ["male", "female", "other", "prefer_not_to_say"];
 
