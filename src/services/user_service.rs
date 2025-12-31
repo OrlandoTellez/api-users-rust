@@ -14,7 +14,7 @@ impl UserService {
         let users: Vec<User> = sqlx::query_as!(
             User,
             r#"
-                SELECT id, name, password, username, age, gender as "gender: _", created_at
+                SELECT id, name, username, age, gender as "gender: _", created_at
                 FROM users
                 ORDER BY id
             "#
@@ -29,7 +29,7 @@ impl UserService {
         let user: User = sqlx::query_as!(
             User,
             r#"
-                SELECT id, name, password, username, age, gender as "gender: _", created_at
+                SELECT id, name, username, age, gender as "gender: _", created_at
                 FROM users
                 WHERE id = $1
             "#,
@@ -50,7 +50,7 @@ impl UserService {
             r#"
                 INSERT INTO users (name, username, password, age, gender)
                 VALUES ($1, $2, $3, $4, $5)
-                RETURNING id, name, username, password, age, gender as "gender: _", created_at
+                RETURNING id, name, username, age, gender as "gender: _", created_at
             "#,
             payload.name,
             payload.username,
@@ -79,7 +79,7 @@ impl UserService {
                 age = COALESCE($3, age),
                 gender = COALESCE($4, gender)
             WHERE id = $5
-            RETURNING id, name, username, password, age, gender as "gender: _", created_at
+            RETURNING id, name, username, age, gender as "gender: _", created_at
             "#,
             payload.name,
             payload.username,

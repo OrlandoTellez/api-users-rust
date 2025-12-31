@@ -19,7 +19,6 @@ pub struct User {
     pub id: i32,
     pub name: String,
     pub username: String,
-    pub password: String,
     pub age: i32,
     pub gender: Gender,
     #[schema(value_type = String, format = DateTime)]
